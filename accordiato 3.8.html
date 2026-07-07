@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AccorDiato - Atelier Loffet</title>
+  
+  <style>
+    /* --- RÉINITIALISATION & BODY --- */
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #1d4873; color: #fff; margin: 0; padding: 5px; display: flex; flex-direction: column; align-items: center; }
+    .calculateur-container { width: 100%; max-width: 360px; background-color: #1d4873; padding: 12px; box-sizing: border-box; }
+
+    /* --- BRANDING & TITRES --- */
+    .brand-container { text-align: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed rgba(255, 255, 255, .2); }
+    .brand-link { font-family: 'Georgia', 'Apple Chancery', cursive, serif; font-size: 1.6rem; color: #fff; font-style: italic; text-decoration: none; }
+    .brand-subtitle { font-size: .58rem; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; color: #dda96b; margin-top: 4px; }
+    h1 { font-size: .9rem; text-align: center; margin: 0 0 12px 0; color: #dda96b; text-transform: uppercase; }
+
+    /* --- FORMULAIRE & CONTROLES --- */
+    .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 6px; margin-bottom: 8px; }
+    .span-3 { grid-column: span 3; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group label { font-size: .58rem; color: #b2c8de; margin-bottom: 3px; text-transform: uppercase; font-weight: 600; }
+    select { width: 100%; box-sizing: border-box; padding: 7px 4px; border-radius: 6px; background: #153759; color: #fff; border: 1px solid #2a5a8a; text-align: center; cursor: pointer; font-size: 0.8rem; }
+
+    /* BLOC MIXTE SOUFFLET / AJOUT */
+    .actions-mix-container { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 8px 0; width: 100%; box-sizing: border-box; }
+    .swipe-container { display: flex; background: #153759; padding: 2px; border-radius: 8px; border: 1px solid #2a5a8a; margin-bottom: 0; }
+    .swipe-container button { flex: 1; padding: 6px; border: none; border-radius: 5px; background: transparent; color: #b2c8de; font-weight: bold; cursor: pointer; font-size: 0.75rem; }
+    .swipe-container button.active { background: #1d4873; color: #dda96b; }
+    .btn-ajouter-suite { width: 100%; background: #dda96b; color: #1d4873; border: none; padding: 6px 10px; border-radius: 8px; font-weight: bold; text-transform: uppercase; cursor: pointer; margin: 0; font-size: 0.75rem; box-sizing: border-box; display: flex; align-items: center; justify-content: center; }
+
+    /* --- RÉSULTATS & CLAVIER PRINCIPAL --- */
+    .resultat-container { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .res-box { background: #153759; padding: 5px; border-radius: 5px; border: 1px solid #2a5a8a; text-align: center; }
+    .res-box h2 { font-size: .58rem; color: #dda96b; margin: 0; }
+    .res-box .content { font-family: monospace; font-size: .68rem; font-weight: bold; white-space: pre-line; }
+
+    #clavier-container { display: grid; grid-template-columns: repeat(3, 36px); gap: 0 4px; justify-content: center; margin-top: 10px; padding: 12px 5px 22px; background: #153759; border-radius: 16px; border: 1px solid #2a5a8a; }
+    .bouton { width: 36px; height: 36px; background: #4d3d30; color: #c4b4a5; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: bold; cursor: pointer; position: relative; margin-top: 2px; box-sizing: border-box; }
+    .bouton.active { background: #fff !important; color: #1d4873 !important; }
+    .note-possible { background: #b87333 !important; color: #fff !important; }
+    .bouton-numero { position: absolute; bottom: 4px; right: 5px; font-size: 7px; color: #8c7867; }
+    .col-milieu-decalee { margin-top: 21px; margin-bottom: -17px; }
+    .fantome { opacity: 0 !important; pointer-events: none; }
+
+    /* --- NAVIGATION & PAGES --- */
+    .page { display: none; }
+    .page.active { display: block; }
+    #main-nav { display: flex; width: 100%; max-width: 360px; background: #153759; border-bottom: 1px solid #2a5a8a; margin-bottom: 5px; }
+    .nav-btn { flex: 1; background: transparent; border: none; color: #b2c8de; padding: 12px 5px; font-weight: bold; text-transform: uppercase; cursor: pointer; border-bottom: 3px solid transparent; }
+    .nav-btn.active { color: #dda96b; border-bottom: 3px solid #dda96b; }
+
+    /* --- PAGE SUITES (LISTES) --- */
+    #liste-sequences-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .carte-accord { background: #153759; border: 1px solid #2a5a8a; border-radius: 10px; padding: 8px; }
+    .btn-supprimer { background: transparent; border: none; color: #ff6b6b; float: right; cursor: pointer; font-weight: bold; }
+    .carte-corps { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .mini-clavier { display: grid; grid-template-columns: repeat(3, 22px); gap: 0 3px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; }
+    .mini-bouton { width: 22px; height: 22px; border-radius: 50%; background: #4d3d30; color: #8c7867; display: flex; justify-content: center; align-items: center; font-size: 6px; font-weight: bold; box-sizing: border-box; }
+    .mini-bouton.active { background: #fff !important; color: #1d4873 !important; }
+    .mini-bouton.pivot { background: #b8d8ff !important; color: #1d4873 !important; }
+    .mini-bouton.col-milieu-decalee { margin-top: 13px; margin-bottom: -11px; }
+    .info-accord { margin-top: 5px; text-align: center; font-size: 0.7rem; color: #dda96b; }
+
+    /* --- SPÉCIFIQUE : ONGLET MON CLAVIER (ÉDITION) --- */
+    #clavier-edition-container { display: grid; grid-template-columns: repeat(3, 36px); gap: 0 4px; justify-content: center; margin-top: 10px; padding: 12px 5px 22px; background: #153759; border-radius: 16px; border: 1px solid #2a5a8a; }
+    .panel-edition { background: #153759; border: 1px solid #2a5a8a; border-radius: 8px; padding: 10px; margin-top: 12px; }
+    .panel-edition h3 { font-size: 0.7rem; color: #dda96b; text-transform: uppercase; margin: 0 0 8px 0; text-align: center; letter-spacing: 1px; }
+    .panel-edition .controls-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 0; }
+
+    /* --- SPLASH SCREEN --- */
+    #splash-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #0f2133; z-index: 9999; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease-out; }
+    .splash-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('https://static.wixstatic.com/media/c45ea3_90458de43b47412e8262b96fc9e440f8~mv2.jpg/v1/fill/w_953,h_650,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/c45ea3_90458de43b47412e8262b96fc9e440f8~mv2.jpg'); background-size: cover; background-position: center; opacity: 0.15; z-index: 1; filter: grayscale(30%) brightness(0.8); }
+    .splash-content { position: relative; z-index: 2; text-align: center; color: #dda96b; }
+    .splash-logo { max-width: 90%; width: 320px; margin-bottom: 25px; background: rgba(255, 255, 255, 0.85); padding: 20px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6); }
+    .splash-title { font-size: 2.8rem; margin: 0; letter-spacing: 2px; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+    .splash-version { font-size: 1.1rem; margin-top: 8px; color: #b2c8de; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+
+  <div id="splash-screen">
+    <div class="splash-bg"></div>
+    <div class="splash-content">
+      <img src="https://static.wixstatic.com/media/352599_3035c95e1ee94258b05e3b2402ea76c0~mv2.png" alt="Logo Atelier Loffet" class="splash-logo">
+      <h1 class="splash-title">AccorDiato</h1>
+      <p class="splash-version">Version 3.7</p>
+    </div>
+  </div>
+
+  <nav id="main-nav" style="border-radius: 8px 8px 0 0; margin-top: 5px; max-width: 360px; width: 100%;">
+    <button id="nav-calculateur" class="nav-btn active" onclick="changerOnglet('calculateur')">Calculateur</button>
+    <button id="nav-suites" class="nav-btn" onclick="changerOnglet('suites')">Suites</button>
+    <button id="nav-clavier" class="nav-btn" onclick="changerOnglet('clavier')">Mon Clavier</button>
+  </nav>
+
+  <section id="page-calculateur" class="page active calculateur-container" style="border-radius: 0 0 8px 8px;">
+    <div class="brand-container">
+      <a class="brand-link" href="#">AccorDiato</a>
+      <div class="brand-subtitle">par l' Atelier Loffet</div>
+    </div>
+
+    <div class="controls-grid">
+      <div class="form-group span-3">
+        <label for="choixClavier">Schéma de clavier</label>
+        <select id="choixClavier">
+          <option value="milleret" selected>Milleret / Pignol (G/C 3 rangs)</option>
+          <option value="heim_1">Heim 1 (G/C 3 rangs)</option>
+          <option value="loffet">Loffet (G/C 3 rangs)</option>
+          <option value="nmad">N.M.A.D. 2018 (G/C 3 rangs)</option>
+          <option value="gaillard">Système Gaillard (G/C 3 rangs)</option>
+          <option value="letron">Système Le Tron / Laloy (G/C 3 rangs)</option>
+          <option value="corgeron">Système J.-M. Corgeron (G/C 3 rangs)</option>
+          <option value="test">Mode Test (Numéros de boutons)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="noteBase">Note</label>
+        <select id="noteBase">
+          <option value="Do">Do</option>
+          <option value="Do#">Do#</option>
+          <option value="Ré">Ré</option>
+          <option value="Mib">Mib</option>
+          <option value="Mi">Mi</option>
+          <option value="Fa">Fa</option>
+          <option value="Fa#">Fa#</option>
+          <option value="Sol" selected>Sol</option>
+          <option value="Sol#">Sol#</option>
+          <option value="La">La</option>
+          <option value="Sib">Sib</option>
+          <option value="Si">Si</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="modeAccord">Mode</label>
+        <select id="modeAccord">
+          <option value="majeur" selected>Maj</option>
+          <option value="mineur">Min</option>
+          <option value="neutre">Neutre</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="enrichissementAccord">Enrich.</label>
+        <select id="enrichissementAccord">
+          <option value="parfait" selected>Parfait</option>
+          <option value="5">5 (Quinte)</option>
+          <option value="sus2">sus2</option>
+          <option value="sus4">sus4</option>
+          <option value="6">6ème</option>
+          <option value="7">7ème</option>
+          <option value="7M">7M</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="resultat-container">
+      <div id="res-pousse" class="res-box">
+        <h2>PROPOSITIONS POUSSÉ</h2>
+        <div class="content">N/A</div>
+      </div>
+      <div id="res-tire" class="res-box">
+        <h2>PROPOSITIONS TIRÉ</h2>
+        <div class="content">N/A</div>
+      </div>
+    </div>
+
+    <div class="actions-mix-container">
+      <div class="swipe-container">
+        <button id="btnPousse" class="active">POUSSÉ</button>
+        <button id="btnTire">TIRÉ</button>
+      </div>
+      <button id="btnAjouterSuite" class="btn-ajouter-suite">+ Ajouter</button>
+    </div>
+
+    <div id="clavier-container"></div>
+  </section>
+
+  <section id="page-suites" class="page calculateur-container" style="border-radius: 0 0 8px 8px;">
+    <div class="brand-container">
+      <div class="brand-link">Suites d'Accords</div>
+      <div class="brand-subtitle">Vos enchaînements personnalisés</div>
+    </div>
+    <div id="liste-sequences-container"></div>
+  </section>
+
+  <section id="page-clavier" class="page calculateur-container" style="border-radius: 0 0 8px 8px;">
+    <div class="brand-container">
+      <div class="brand-link">Mon Clavier</div>
+      <div class="brand-subtitle">Personnalisation de la lutherie</div>
+    </div>
+
+    <div class="swipe-container">
+      <button id="btnEditPousse" class="active" onclick="directionEdition='pousse'; document.querySelectorAll('#page-clavier .swipe-container button').forEach(b=>b.classList.remove('active')); this.classList.add('active'); mettreAJourEditeur();">VOIR POUSSÉ</button>
+      <button id="btnEditTire" onclick="directionEdition='tire'; document.querySelectorAll('#page-clavier .swipe-container button').forEach(b=>b.classList.remove('active')); this.classList.add('active'); mettreAJourEditeur();">VOIR TIRÉ</button>
+    </div>
+
+    <div id="zone-formulaire-edition" class="panel-edition" style="margin-bottom: 12px;">
+      <h3 id="label-bouton-en-cours">Sélectionnez un bouton ci-dessous...</h3>
+      
+      <div class="controls-grid">
+        <div class="form-group">
+          <label for="edit-note-pousse">Note Poussé</label>
+          <select id="edit-note-pousse" onchange="appliquerChangementNote('pousse', this.value)">
+            <option value="">Vide</option>
+            <option value="Do">Do</option>
+            <option value="Do#">Do#</option>
+            <option value="Ré">Ré</option>
+            <option value="Mib">Mib</option>
+            <option value="Mi">Mi</option>
+            <option value="Fa">Fa</option>
+            <option value="Fa#">Fa#</option>
+            <option value="Sol">Sol</option>
+            <option value="Sol#">Sol#</option>
+            <option value="La">La</option>
+            <option value="Sib">Sib</option>
+            <option value="Si">Si</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-note-tire">Note Tiré</label>
+          <select id="edit-note-tire" onchange="appliquerChangementNote('tire', this.value)">
+            <option value="">Vide</option>
+            <option value="Do">Do</option>
+            <option value="Do#">Do#</option>
+            <option value="Ré">Ré</option>
+            <option value="Mib">Mib</option>
+            <option value="Mi">Mi</option>
+            <option value="Fa">Fa</option>
+            <option value="Fa#">Fa#</option>
+            <option value="Sol">Sol</option>
+            <option value="Sol#">Sol#</option>
+            <option value="La">La</option>
+            <option value="Sib">Sib</option>
+            <option value="Si">Si</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="clavier-edition-container"></div>
+
+    <button id="btn-sauvegarder-clavier" class="btn-ajouter-suite" style="margin-top: 15px;" onclick="sauvegarderClavierPerso()">
+      Enregistrer mon clavier
+    </button>
+  </section>
+
+  <script>
+    // =================================================================
+    // 1. SYSTÈME DE NAVIGATION DE L'APPLICATION (SPA)
+    // =================================================================
+    window.changerOnglet = function(idOnglet) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active'));
+      
+      document.getElementById(`page-${idOnglet}`).classList.add('active');
+      document.getElementById(`nav-${idOnglet}`).classList.add('active');
+
+      if(idOnglet === 'suites') {
+        rafraichirVueSuites();
+      }
+      if(idOnglet === 'clavier') {
+        initialiserOngletEdition();
+      }
+    };
+
+    // =================================================================
+    // 2. CONFIGURATION ET ÉTAT GLOBAL
+    // =================================================================
+    const SCHEMA_VIDE = {
+      pousse: {
+        "0''": "", "1''": "", "2''": "", "3''": "", "4''": "", "5''": "", "6''": "", "7''": "", "8''": "", "9''": "", "10''": "", "11''": "",
+        "0'": "",  "1'": "",  "2'": "",  "3'": "",  "4'": "",  "5'": "",  "6'": "",  "7'": "",  "8'": "",  "9'": "",  "10'": "",  "11'": "",
+        "1": "",   "2": "",   "3": "",   "4": "",   "5": "",   "6": "",   "7": "",   "8": "",   "9": "",   "10": "",   "11": "",   "0": ""
+      },
+      tire: {
+        "0''": "", "1''": "", "2''": "", "3''": "", "4''": "", "5''": "", "6''": "", "7''": "", "8''": "", "9''": "", "10''": "", "11''": "",
+        "0'": "",  "1'": "",  "2'": "",  "3'": "",  "4'": "",  "5'": "",  "6'": "",  "7'": "",  "8'": "",  "9'": "",  "10'": "",  "11'": "",
+        "1": "",   "2": "",   "3": "",   "4": "",   "5": "",   "6": "",   "7": "",   "8": "",   "9": "",   "10": "",   "11": "",   "0": ""
+      }
+    };
+
+    let clavierPerso = JSON.parse(localStorage.getItem('clavierPersoConfiguration')) || JSON.parse(JSON.stringify(SCHEMA_VIDE));
+    let suiteDAccordsMemo = JSON.parse(localStorage.getItem('suiteDAccordsMemo')) || [];
+
+    const CATALOGUE_CLAVIERS = {
+      test: {
+        pousse: { 
+          "0''": "0''", "1''": "1''", "2''": "2''", "3''": "3''", "4''": "4''", "5''": "5''", "6''": "6''", "7''": "7''", "8''": "8''", "9''": "9''", "10''": "10''", "11''": "11''",
+          "0'": "0'",   "1'": "1'",   "2'": "2'",   "3'": "3'",   "4'": "4'",   "5'": "5'",   "6'": "6'",   "7'": "7'",   "8'": "8'",   "9'": "9'",   "10'": "10'",  "11'": "11'",
+          "1": "1",     "2": "2",     "3": "3",     "4": "4",     "5": "5",     "6": "6",     "7": "7",     "8": "8",     "9": "9",     "10": "10",   "11": "11",    "0": "0" 
+        },
+        tire: { 
+          "0''": "0''", "1''": "1''", "2''": "2''", "3''": "3''", "4''": "4''", "5''": "5''", "6''": "6''", "7''": "7''", "8''": "8''", "9''": "9''", "10''": "10''", "11''": "11''",
+          "0'": "0'",   "1'": "1'",   "2'": "2'",   "3'": "3'",   "4'": "4'",   "5'": "5'",   "6'": "6'",   "7'": "7'",   "8'": "8'",   "9'": "9'",   "10'": "10'",  "11'": "11'",
+          "1": "1",     "2": "2",     "3": "3",     "4": "4",     "5": "5",     "6": "6",     "7": "7",     "8": "8",     "9": "9",     "10": "10",   "11": "11",    "0": "0"
+        }
+      },
+      heim_1: {
+        pousse: { 
+          "0''": "Fa",  "1''": "Mib", "2''": "Sol#", "3''": "Fa",  "4''": "Mib", "5''": "Sol#", "6''": "Fa",  "7''": "Mib", "8''": "Sol#", "9''": "Fa",  "10''": "", "11''": "",
+          "0'": "Mi",   "1'": "La",   "2'": "Mi",   "3'": "Do",   "4'": "La",   "5'": "Mi",   "6'": "Do",   "7'": "La",   "8'": "Do",   "9'": "Mi",   "10'": "La",  "11'": "",
+          "0": "Si",    "1": "Ré",    "2": "Si",    "3": "Sol",   "4": "Ré",    "5": "Si",    "6": "Sol",   "7": "Ré",    "8": "Si",    "9": "Sol",   "10": "Ré",   "11": "Sol"
+        },
+        tire: { 
+          "0''": "Sib", "1''": "Do#", "2''": "Mib", "3''": "Sol#", "4''": "Sib", "5''": "Do#", "6''": "Mib", "7''": "Sol#", "8''": "Sib", "9''": "Do#", "10''": "", "11''": "",
+          "0'": "Sol",  "1'": "Si",   "2'": "Ré",   "3'": "Fa",   "4'": "Sol",  "5'": "Si",   "6'": "Ré",   "7'": "Fa",   "8'": "Sol",  "9'": "Si",   "10'": "Ré",  "11'": "",
+          "0": "Mi",    "1": "Fa#",   "2": "La",    "3": "Do",    "4": "Mi",    "5": "Fa#",   "6": "La",    "7": "Do",    "8": "Mi",    "9": "Fa#",   "10": "La",   "11": "Do"
+        }
+      },
+      milleret: {
+        pousse: {
+          "0''": "Fa", "1''": "Sol#", "2''": "Mib", "3''": "Fa", "4''": "Fa#", "5''": "Mib", "6''": "Fa", "7''": "Fa#", "8''": "Mib", "9''": "Fa", "10''": "Fa#",
+          "0'": "Mi", "1'": "Sib", "2'": "La", "3'": "Do", "4'": "Mi", "5'": "La", "6'": "Do", "7'": "Mi", "8'": "La", "9'": "Do", "10'": "Mi", "11'": "Sol",
+          "1": "Do#", "2": "Ré", "3": "Sol", "4": "Si", "5": "Ré", "6": "Sol", "7": "Si", "8": "Ré", "9": "Sol", "10": "Si", "11": "Ré"
+        },
+        tire: {
+          "0''": "Sib", "1''": "Do#", "2''": "Mib", "3''": "Sol", "4''": "Sib", "5''": "Do#", "6''": "Mib", "7''": "Sol", "8''": "Sib", "9''": "Do#", "10''": "Do",
+          "0'": "Sol", "1'": "Sol#", "2'": "Si", "3'": "Ré", "4'": "Fa", "5'": "Sol#", "6'": "Si", "7'": "Ré", "8'": "Fa", "9'": "Sol#", "10'": "Si", "11'": "Ré",
+          "1": "Fa", "2": "Fa#", "3": "La", "4": "Do", "5": "Mi", "6": "Fa#", "7": "La", "8": "Do", "9": "Mi", "10": "Fa#", "11": "La"
+        }
+      },
+      loffet: {
+        pousse: { "1''": "Sol#", "1'": "Mi", "1": "Si", "2''": "La", "2'": "Sol", "2": "Ré", "3''": "Mib", "3'": "Do", "3": "Sol", "4''": "Sol#", "4'": "Mi", "4": "Si", "5''": "La", "5'": "Sol", "5": "Ré", "6''": "Mib", "6'": "Do", "6": "Sol", "7''": "Sol#", "7'": "Mi", "7": "Si", "8''": "La", "8'": "Sol", "8": "Ré", "9''": "Mib", "9'": "Do", "9": "Sol", "10''": "", "10'": "Mi", "10": "Si", "11''": "", "11'": "", "11": "Ré" },
+        tire: { "1''": "Sib", "1'": "Fa", "1": "Mi", "2''": "Do#", "2'": "Si", "2": "Fa#", "3''": "Sol", "3'": "Ré", "3": "La", "4''": "Sol#", "4'": "Fa", "4": "Do", "5''": "Sib", "5'": "La", "5": "Mi", "6''": "Do#", "6'": "Si", "6": "Fa#", "7''": "Sol", "7'": "Ré", "7": "La", "8''": "Sol#", "8'": "Fa", "8": "Do", "9''": "Sib", "9'": "La", "9": "Mi", "10''": "", "10'": "Si", "10": "Fa#", "11''": "", "11'": "", "11": "La" }
+      },
+      nmad: {
+        pousse: { "1": "Si", "2": "Ré", "3": "Sol", "4": "Si", "5": "Ré", "6": "Sol", "7": "Si", "8": "Ré", "9": "Sol", "10": "Si", "11": "Ré", "12": "Sol", "1'": "Mi", "2'": "La", "3'": "Do", "4'": "Mi", "5'": "La", "6'": "Do", "7'": "Mi", "8'": "La", "9'": "Do", "10'": "Mi", "11'": "La", "1''": "Sol#", "2''": "Mib", "3''": "Fa", "4''": "Sol#", "5''": "Sib", "6''": "Mib", "7''": "Fa", "8''": "Sol#", "9''": "Sib", "10''": "Mib" },
+        tire: { "1": "Mi", "2": "Fa#", "3": "La", "4": "Do", "5": "Mi", "6": "Fa#", "7": "La", "8": "Do", "9": "Mi", "10": "Fa#", "11": "La", "12": "Do", "1'": "Fa", "2'": "Si", "3'": "Ré", "4'": "Fa", "5'": "Sol", "6'": "Si", "7'": "Ré", "8'": "Fa", "9'": "Sol", "10'": "Si", "11'": "Ré", "1''": "Sib", "2''": "Do#", "3''": "Mib", "4''": "Sol#", "5''": "Sib", "6''": "Do#", "7''": "Mib", "8''": "Sol#", "9''": "Sib", "10''": "Do#" }
+      },
+      gaillard: {
+        pousse: { "1": "Si", "2": "Ré", "3": "Sol", "4": "Si", "5": "Ré", "6": "Sol", "7": "Si", "8": "Ré", "9": "Sol", "10": "Si", "11": "Ré", "0'": "Do", "1'": "Mi", "2'": "Sol", "3'": "Do", "4'": "Mi", "5'": "Sol", "6'": "Do", "7'": "Mi", "8'": "Sol", "9'": "Do", "10'": "Mi", "11'": "Sol", "0''": "Mib", "1''": "Sol#", "2''": "La", "3''": "Mib", "4''": "Sol#", "5''": "La", "6''": "Mib", "7''": "Sol#", "8''": "La", "9''": "Mib", "10''": "Sol#" },
+        tire: { "1": "Mi", "2": "Fa#", "3": "La", "4": "Do", "5": "Mi", "6": "Fa#", "7": "La", "8": "Do", "9": "Mi", "10": "Fa#", "11": "La", "0'": "Fa", "1'": "Sol", "2'": "Si", "3'": "Ré", "4'": "Fa", "5'": "La", "6'": "Si", "7'": "Ré", "8'": "Fa", "9'": "La", "10'": "Si", "11'": "Ré", "0''": "Sol#", "1''": "Sib", "2''": "Do#", "3''": "Sol", "4''": "Sol#", "5''": "Sib", "6''": "Do#", "7''": "Sol", "8''": "Sol#", "9''": "Sib", "10''": "Do#" }
+      },
+      letron: {
+        pousse: { "1": "Do#", "2": "Ré", "3": "Sol", "4": "Si", "5": "Ré", "6": "Sol", "7": "Si", "8": "Ré", "9": "Sol", "10": "Si", "11": "Ré", "12": "Sol", "1'": "La", "2'": "Sol", "3'": "Do", "4'": "Mi", "5'": "Sol", "6'": "Do", "7'": "Mi", "8'": "Sol", "9'": "Do", "10'": "Mi", "11'": "Sol", "1''": "Sol#", "2''": "Sib", "3''": "Mib", "4''": "Sol#", "5''": "Sib", "6''": "Mib", "7''": "Sol#", "8''": "Sib", "9''": "Mib", "10''": "Sol#" },
+        tire: { "1": "Mib", "2": "Fa#", "3": "La", "4": "Do", "5": "Mi", "6": "Fa#", "7": "La", "8": "Do", "9": "Mi", "10": "Fa#", "11": "La", "12": "Do", "1'": "Sol#", "2'": "Si", "3'": "Ré", "4'": "Fa", "5'": "La", "6'": "Si", "7'": "Ré", "8'": "Fa", "9'": "La", "10'": "Si", "11'": "Ré", "1''": "Sib", "2''": "Do#", "3''": "Sol", "4''": "Sol#", "5''": "Sib", "6''": "Do#", "7''": "Sol", "8''": "Sol#", "9''": "Sib", "10''": "Do#" }
+      },
+      corgeron: {
+        pousse: { "1": "Si", "2": "Ré", "3": "Sol", "4": "Si", "5": "Ré", "6": "Sol", "7": "Si", "8": "Ré", "9": "Sol", "10": "Si", "11": "Ré", "12": "Sol", "1'": "Mi", "2'": "Sol", "3'": "Do", "4'": "Mi", "5'": "Sol", "6'": "Do", "7'": "Mi", "8'": "Sol", "9'": "Do", "10'": "Mi", "11'": "Sol", "1''": "Sol#", "2''": "Sib", "3''": "Mib", "4''": "Sol#", "5''": "Sib", "6''": "Mib", "7''": "Sol#", "8''": "Sib", "9''": "Mib", "10''": "Sol#" },
+        tire: { "1": "Mi", "2": "Fa#", "3": "La", "4": "Do", "5": "Mi", "6": "Fa#", "7": "La", "8": "Do", "9": "Mi", "10": "Fa#", "11": "La", "12": "Do", "1'": "La", "2'": "Si", "3'": "Ré", "4'": "Fa", "5'": "La", "6'": "Si", "7'": "Ré", "8'": "Fa", "9'": "La", "10'": "Si", "11'": "Ré", "1''": "Sib", "2''": "Do#", "3''": "Sol", "4''": "", "5''": "", "6''": "Do#", "7''": "Sol", "8''": "Sol#", "9''": "Sib", "10''": "Do#" }
+      },
+      perso: clavierPerso
+    };
+
+    const PREFERENCES_MAIN_GAUCHE = {
+      "La": "tire", "Fa": "tire", "Sol": "pousse", "Ré": "tire", "Sib": "tire", 
+      "Fa#": "tire", "Si": "tire", "Do": "pousse", "Mi": "pousse", "Mib": "pousse", "Sol#": "pousse"
+    };
+
+    const FREQUENCES_BASE = {
+      "Do": 261.63, "Do#": 277.18, "Ré": 293.66, "Mib": 311.13, 
+      "Mi": 329.63, "Fa": 349.23, "Fa#": 369.99, "Sol": 392.00, 
+      "Sol#": 415.30, "La": 440.00, "Sib": 466.16, "Si": 493.88
+    };
+
+    let currentDirection = 'pousse';
+    let currentClavierId = 'milleret';
+    let directionVerrouilleeParUtilisateur = false;
+    let directionEdition = 'pousse'; 
+    let boutonEnCoursDEdition = null;
+
+    // =================================================================
+    // 3. MOTEUR AUDIO ET MUSICAL
+    // =================================================================
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+
+    const normaliserNote = (note) => {
+      if (!note) return "";
+      let n = note.trim();
+      if (n.includes("Do#") || n.includes("Réb")) return "Do#";
+      if (n.includes("Ré#") || n.includes("Mib")) return "Mib";
+      if (n.includes("Fa#") || n.includes("Solb")) return "Fa#";
+      if (n.includes("Sol#") || n.includes("Lab")) return "Sol#";
+      if (n.includes("La#") || n.includes("Sib")) return "Sib";
+      return n;
+    };
+
+    function jouerSonNote(nomNote, boutonId) {
+      const noteNormalisee = normaliserNote(nomNote);
+      if (!noteNormalisee || !FREQUENCES_BASE[noteNormalisee]) return;
+
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      let multiplicateurOctave = 1; 
+      const numBouton = parseInt(boutonId);
+
+      if (numBouton >= 3 && numBouton <= 6) multiplicateurOctave = 2;
+      if (numBouton >= 7 && numBouton <= 10) multiplicateurOctave = 4;
+      if (numBouton > 10) multiplicateurOctave = 8;
+      if (boutonId.includes("''")) multiplicateurOctave *= 0.5;
+
+      const frequenceFinale = FREQUENCES_BASE[noteNormalisee] * multiplicateurOctave;
+      
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.type = 'sawtooth'; 
+      oscillator.frequency.setValueAtTime(frequenceFinale, audioCtx.currentTime);
+
+      gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); 
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2); 
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 1.2);
+    }
+
+    function obtenirNotesAccord(tonique, mode, enrichissement) {
+      const notesChromatiques = ["Do", "Do#", "Ré", "Mib", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "Sib", "Si"];
+      let indexTonique = notesChromatiques.indexOf(normaliserNote(tonique));
+      if (indexTonique === -1) return [];
+
+      const ajouterIntervalle = (demiTons) => notesChromatiques[(indexTonique + demiTons) % 12];
+      
+      let tierce = null;
+      if (mode === "majeur") tierce = 4;
+      if (mode === "mineur") tierce = 3;
+
+      if (enrichissement === "5") return [ajouterIntervalle(0), ajouterIntervalle(7)];
+      if (enrichissement === "sus2") return [ajouterIntervalle(0), ajouterIntervalle(2), ajouterIntervalle(7)];
+      if (enrichissement === "sus4") return [ajouterIntervalle(0), ajouterIntervalle(5), ajouterIntervalle(7)];
+      
+      let t = (tierce !== null) ? tierce : 4;
+
+      if (enrichissement === "parfait") return [ajouterIntervalle(0), ajouterIntervalle(t), ajouterIntervalle(7)];
+      if (enrichissement === "6") return [ajouterIntervalle(0), ajouterIntervalle(t), ajouterIntervalle(7), ajouterIntervalle(9)];
+      if (enrichissement === "7") return [ajouterIntervalle(0), ajouterIntervalle(t), ajouterIntervalle(7), ajouterIntervalle(10)];
+      if (enrichissement === "7M") return [ajouterIntervalle(0), ajouterIntervalle(t), ajouterIntervalle(7), ajouterIntervalle(11)];
+
+      return [];
+    }
+
+    // =================================================================
+    // 4. MOTEUR ERGONOMIQUE
+    // =================================================================
+    function getCoordonnees(btn) {
+      return {
+        colonne: parseInt(btn),
+        rang: btn.includes("''") ? 0 : (btn.includes("'") ? 1 : 2)
+      };
+    }
+
+    function calculerScoreErgonomique(combinaison) {
+      const coords = combinaison.map(getCoordonnees);
+      const colonnes = coords.map(c => c.colonne);
+      const rangs = coords.map(c => c.rang);
+      const largeur = Math.max(...colonnes) - Math.min(...colonnes);
+
+      let ecartTotal = 0;
+      for (let i = 0; i < colonnes.length; i++) {
+        for (let j = i + 1; j < colonnes.length; j++) {
+          ecartTotal += Math.abs(colonnes[i] - colonnes[j]);
+        }
+      }
+
+      let penaliteRangs = 0;
+      for (let i = 0; i < rangs.length; i++) {
+        for (let j = i + 1; j < rangs.length; j++) {
+          penaliteRangs += Math.abs(rangs[i] - rangs[j]);
+        }
+      }
+
+      const poidsColonnes = { 0: 40, 1: 30, 2: 20, 3: 10, 4: 2, 5: 0, 6: 0, 7: 0, 8: 2, 9: 10, 10: 20, 11: 30 };
+      let penaliteCentre = 0;
+      colonnes.forEach(col => { penaliteCentre += poidsColonnes[col] || 0; });
+
+      const colonnesUniques = [...new Set(colonnes)];
+      let bonusAlignement = 0;
+      if (colonnesUniques.length === 1) bonusAlignement = -30;
+      else if (colonnesUniques.length === 2) bonusAlignement = -15;
+
+      return (penaliteCentre * 50 + largeur * 100 + ecartTotal * 20 + penaliteRangs * 5 + bonusAlignement);
+    }
+
+    function getCalculsPourSoufflet(direction, tonique, mode, enrichissement) {
+      if (currentClavierId === 'test') return [];
+      const notesAccord = obtenirNotesAccord(tonique, mode, enrichissement).map(normaliserNote);
+      const plan = CATALOGUE_CLAVIERS[currentClavierId][direction];
+
+      const positionsParNote = notesAccord.map(note =>
+        Object.keys(plan).filter(btn => plan[btn] && normaliserNote(plan[btn]) === note)
+      );
+
+      if (positionsParNote.some(liste => liste.length === 0)) return [];
+
+      const combinaisons = [];
+      function construire(index, combinaisonCourante) {
+        if (index === positionsParNote.length) {
+          const unique = [...new Set(combinaisonCourante)];
+          if (unique.length === notesAccord.length) {
+            combinaisons.push({
+              boutons: [...combinaisonCourante],
+              score: calculerScoreErgonomique(combinaisonCourante)
+            });
+          }
+          return;
+        }
+        positionsParNote[index].forEach(btn => {
+          combinaisonCourante.push(btn);
+          construire(index + 1, combinaisonCourante);
+          combinaisonCourante.pop();
+        });
+      }
+      construire(0, []);
+
+      const getRowRank = btn => btn.includes("''") ? 1 : (btn.includes("'") ? 2 : 3);
+      combinaisons.sort((a, b) => a.score - b.score);
+
+      const resultat = [];
+      const dejaVus = new Set();
+
+      for (const item of combinaisons) {
+        const tri = [...item.boutons].sort((a, b) => getRowRank(a) - getRowRank(b) || parseInt(a) - parseInt(b));
+        const cle = tri.join('-');
+        if (!dejaVus.has(cle)) {
+          dejaVus.add(cle);
+          resultat.push(tri);
+        }
+        if (resultat.length >= 2) break;
+      }
+      return resultat;
+    }
+
+    // =================================================================
+    // 5. INTERFACE DU CALCULATEUR PRINCIPAL
+    // =================================================================
+    function genererClavierDOM() {
+      const container = document.getElementById('clavier-container');
+      if (!container) return;
+      container.innerHTML = '';
+      const indexLines = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1];
+
+      indexLines.forEach(num => {
+        ["0''", "0'", "0"].forEach((rowType, i) => {
+          let keyRef;
+          if (rowType === "0''") {
+            if (num === -1) { container.appendChild(creerBoutonFantome('bouton fantome')); return; }
+            keyRef = `${num}''`;
+          } else if (rowType === "0'") {
+            if (num === -1) { container.appendChild(creerBoutonFantome('bouton fantome col-milieu-decalee')); return; }
+            keyRef = `${num}'`;
+          } else {
+            keyRef = (num === -1) ? "0" : (num + 1).toString();
+          }
+
+          const b = document.createElement('div');
+          b.className = 'bouton';
+          if (i === 1) b.classList.add('col-milieu-decalee');
+          b.id = "btn-" + keyRef;
+
+          let noteP = CATALOGUE_CLAVIERS[currentClavierId].pousse[keyRef];
+          let noteT = CATALOGUE_CLAVIERS[currentClavierId].tire[keyRef];
+          if ((noteP === undefined && noteT === undefined) || (noteP === "" && noteT === "")) b.classList.add('fantome');
+
+          b.innerHTML = `<div class="note-texte"></div><div class="bouton-numero">${keyRef}</div>`;
+
+          b.addEventListener('click', () => {
+            if (!b.classList.contains('fantome')) {
+              const planActuel = CATALOGUE_CLAVIERS[currentClavierId][currentDirection];
+              const noteAJouer = planActuel[keyRef];
+              if (noteAJouer) {
+                jouerSonNote(noteAJouer, keyRef);
+                b.style.transform = "scale(0.88)";
+                setTimeout(() => b.style.transform = "none", 80);
+              }
+            }
+          });
+          container.appendChild(b);
+        });
+      });
+    }
+
+    function creerBoutonFantome(classes) {
+      const vide = document.createElement('div');
+      vide.className = classes;
+      return vide;
+    }
+
+    function update(provenanceDeclencheur = '') {
+      const tonique = document.getElementById('noteBase').value;
+      const mode = document.getElementById('modeAccord').value;
+      const enrichissement = document.getElementById('enrichissementAccord').value;
+      
+      const resP = getCalculsPourSoufflet('pousse', tonique, mode, enrichissement);
+      const resT = getCalculsPourSoufflet('tire', tonique, mode, enrichissement);
+      
+      const toniqueNorm = normaliserNote(tonique);
+      const preferenceMG = PREFERENCES_MAIN_GAUCHE[toniqueNorm];
+
+      if (!directionVerrouilleeParUtilisateur || provenanceDeclencheur === 'select') {
+        if (resP.length > 0 && resT.length > 0) {
+          currentDirection = preferenceMG ? preferenceMG : 'pousse';
+        } else if (resP.length > 0) {
+          currentDirection = 'pousse';
+        } else if (resT.length > 0) {
+          currentDirection = 'tire';
+        }
+        directionVerrouilleeParUtilisateur = false;
+      }
+
+      document.getElementById('btnPousse').classList.toggle('active', currentDirection === 'pousse');
+      document.getElementById('btnTire').classList.toggle('active', currentDirection === 'tire');
+
+      const format = (l) => l.length > 0 ? l.map((p, i) => `P${i+1}: ${p.join(' ')}`).join('\n') : "N/A";
+      document.querySelector('#res-pousse .content').innerText = (currentClavierId === 'test') ? "MODE TEST" : format(resP);
+      document.querySelector('#res-tire .content').innerText = (currentClavierId === 'test') ? "MODE TEST" : format(resT);
+      
+      document.querySelectorAll('#clavier-container .bouton').forEach(b => b.classList.remove('active', 'note-possible'));
+      
+      const planActuel = CATALOGUE_CLAVIERS[currentClavierId][currentDirection];
+      const notesDeLAccord = obtenirNotesAccord(tonique, mode, enrichissement).map(normaliserNote);
+
+      Object.keys(planActuel).forEach(btnId => {
+        const el = document.getElementById("btn-" + btnId);
+        if (el && !el.classList.contains('fantome')) {
+          const txt = planActuel[btnId];
+          el.querySelector('.note-texte').innerText = (currentClavierId === 'test') ? txt : (txt || '-');
+          if (currentClavierId !== 'test' && txt && notesDeLAccord.includes(normaliserNote(txt))) {
+            el.classList.add('note-possible');
+          }
+        }
+      });
+
+      if (currentClavierId !== 'test') {
+        const prop = (currentDirection === 'pousse') ? resP : resT;
+        if (prop.length > 0) {
+          prop[0].forEach(id => {
+            const el = document.getElementById("btn-" + id);
+            if (el) el.classList.replace('note-possible', 'active');
+          });
+        }
+      }
+    }
+
+    // =================================================================
+    // 6. GESTION DES SUITES D'ACCORDS
+    // =================================================================
+    function sauvegarderSuites() {
+      localStorage.setItem('suiteDAccordsMemo', JSON.stringify(suiteDAccordsMemo));
+    }
+
+    window.rafraichirVueSuites = function() {
+      const container = document.getElementById('liste-sequences-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if(suiteDAccordsMemo.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:#b2c8de; font-size:0.8rem; margin-top:30px; padding: 20px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">Votre liste est vide.<br><br>Ajoutez des accords à l'aide du bouton présent sous le calculateur.</div>`;
+        return;
+      }
+
+      suiteDAccordsMemo.forEach((accord, index) => {
+        const carte = document.createElement('div');
+        carte.className = 'carte-accord';
+        carte.innerHTML = `<button class="btn-supprimer">✕</button>`;
+
+        carte.querySelector('.btn-supprimer').onclick = () => {
+          suiteDAccordsMemo = suiteDAccordsMemo.filter(a => a.id !== accord.id);
+          sauvegarderSuites();
+          rafraichirVueSuites();
+        };
+
+        const accordPrecedent = index > 0 ? suiteDAccordsMemo[index - 1] : null;
+        const boutonsPivot = accordPrecedent ? accord.boutons.filter(btn => accordPrecedent.boutons.includes(btn)) : [];
+        
+        const carteCorps = document.createElement('div');
+        carteCorps.className = 'carte-corps';
+
+        const accordVertical = document.createElement('div');
+        accordVertical.className = 'accord-vertical';
+        accordVertical.textContent = accord.nom + ' ' + (accord.soufflet === 'POUSSÉ' ? 'P' : 'T');
+        
+        const miniClavierDOM = document.createElement('div');
+        miniClavierDOM.className = 'mini-clavier';
+
+        const colonnesUtilisees = accord.boutons.map(b => parseInt(b));
+        const cadreDebut = Math.max(0, Math.min(...colonnesUtilisees) - 1);
+        const cadreFin = Math.min(11, Math.max(...colonnesUtilisees) + 1);
+
+        for (let num = cadreFin; num >= cadreDebut; num--) {
+          ["0''", "0'", "0"].forEach((rowType, rowIndex) => {
+            let keyRef = rowType === "0''" ? `${num}''` : rowType === "0'" ? `${num}'` : (num === 0 ? "0" : (num+1).toString());
+
+            const mb = document.createElement('div');
+            mb.className = 'mini-bouton';
+            if (rowIndex === 1) mb.classList.add('col-milieu-decalee');
+
+            const planP = CATALOGUE_CLAVIERS[accord.clavierRef].pousse[keyRef];
+            const planT = CATALOGUE_CLAVIERS[accord.clavierRef].tire[keyRef];
+            
+            if ((planP === undefined && planT === undefined) || (planP === "" && planT === "")) {
+              mb.classList.add('fantome');
+            } else {
+              mb.innerText = keyRef;
+              if (accord.boutons.includes(keyRef)) {
+                if (boutonsPivot.includes(keyRef)) mb.classList.add('pivot');
+                else mb.classList.add('active');
+              }
+            }
+            miniClavierDOM.appendChild(mb);
+          });
+        }
+        
+        carteCorps.appendChild(accordVertical);
+        carteCorps.appendChild(miniClavierDOM);
+        carte.appendChild(carteCorps);
+
+        const infoAccord = document.createElement('div');
+        infoAccord.className = 'info-accord';
+        const numeros = accord.boutons.map(btn => parseInt(btn)).sort((a,b) => a-b).join('-');
+        infoAccord.innerHTML = `<div class="numeros-boutons">${numeros}</div>`;
+        
+        carte.appendChild(infoAccord);
+        container.appendChild(carte);
+      });
+    };
+
+    // =================================================================
+    // 7. ÉDITEUR "MON CLAVIER"
+    // =================================================================
+    function injecterClavierPersoDansSelecteur() {
+      const selectClavier = document.getElementById('choixClavier');
+      if (!selectClavier) return;
+      
+      if (!selectClavier.querySelector('option[value="perso"]')) {
+        const optionPerso = document.createElement('option');
+        optionPerso.value = 'perso';
+        optionPerso.text = 'Mon Clavier Perso (Enregistré)';
+        selectClavier.appendChild(optionPerso);
+      }
+    }
+
+    function sauvegarderClavierPerso() {
+      localStorage.setItem('clavierPersoConfiguration', JSON.stringify(clavierPerso));
+      CATALOGUE_CLAVIERS.perso = clavierPerso;
+      injecterClavierPersoDansSelecteur();
+      
+      const btn = document.getElementById('btn-sauvegarder-clavier');
+      if (btn) {
+        const txtOrig = btn.innerText;
+        btn.innerText = "✓ ENREGISTRÉ !";
+        setTimeout(() => { btn.innerText = txtOrig; }, 1500);
+      }
+    }
+
+    function initialiserOngletEdition() {
+      injecterClavierPersoDansSelecteur();
+      genererClavierEditionDOM();
+      mettreAJourEditeur();
+    }
+
+    function genererClavierEditionDOM() {
+      const container = document.getElementById('clavier-edition-container');
+      if (!container) return;
+      container.innerHTML = '';
+      const indexLines = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, -1];
+
+      indexLines.forEach(num => {
+        ["0''", "0'", "0"].forEach((rowType, i) => {
+          let keyRef;
+          if (rowType === "0''") {
+            if (num === -1) { container.appendChild(creerBoutonFantome('bouton fantome')); return; }
+            keyRef = `${num}''`;
+          } else if (rowType === "0'") {
+            if (num === -1) { container.appendChild(creerBoutonFantome('bouton fantome col-milieu-decalee')); return; }
+            keyRef = `${num}'`;
+          } else {
+            keyRef = (num === -1) ? "0" : (num + 1).toString();
+          }
+
+          const b = document.createElement('div');
+          b.className = 'bouton';
+          if (i === 1) b.classList.add('col-milieu-decalee');
+          b.id = "edit-btn-" + keyRef;
+          b.innerHTML = `<div class="note-texte"></div><div class="bouton-numero">${keyRef}</div>`;
+
+          b.addEventListener('click', () => ouvrirPanneauEditionBouton(keyRef));
+          container.appendChild(b);
+        });
+      });
+    }
+
+    function ouvrirPanneauEditionBouton(keyRef) {
+      boutonEnCoursDEdition = keyRef;
+      
+      document.querySelectorAll('#clavier-edition-container .bouton').forEach(btn => btn.classList.remove('active'));
+      const b = document.getElementById("edit-btn-" + keyRef);
+      if (b) b.classList.add('active');
+
+      const labelBouton = document.getElementById('label-bouton-en-cours');
+      const selectNotePousse = document.getElementById('edit-note-pousse');
+      const selectNoteTire = document.getElementById('edit-note-tire');
+
+      if (labelBouton && selectNotePousse && selectNoteTire) {
+        labelBouton.innerText = `Bouton ${keyRef}`;
+        selectNotePousse.value = clavierPerso.pousse[keyRef] || "";
+        selectNoteTire.value = clavierPerso.tire[keyRef] || "";
+      }
+    }
+
+    function mettreAJourEditeur() {
+      const planActuel = clavierPerso[directionEdition];
+      Object.keys(planActuel).forEach(btnId => {
+        const el = document.getElementById("edit-btn-" + btnId);
+        if (el) {
+          const txt = planActuel[btnId];
+          el.querySelector('.note-texte').innerText = txt || '-';
+          el.classList.toggle('note-possible', !!txt);
+        }
+      });
+    }
+
+    function appliquerChangementNote(sens, nouvelleNote) {
+      if (!boutonEnCoursDEdition) return;
+      clavierPerso[sens][boutonEnCoursDEdition] = nouvelleNote;
+      mettreAJourEditeur();
+    }
+
+    // =================================================================
+    // 8. ÉCOUTEURS D'ÉVÉNEMENTS & DÉMARRAGE
+    // =================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- GESTION DU SPLASH SCREEN ---
+      const splash = document.getElementById('splash-screen');
+      if (splash) {
+        setTimeout(() => {
+          splash.style.opacity = '0';
+          setTimeout(() => {
+            splash.style.display = 'none';
+          }, 800);
+        }, 4000); 
+      }
+      
+      const choixClavier = document.getElementById('choixClavier');
+      if (choixClavier) {
+        choixClavier.addEventListener('change', (e) => { 
+          currentClavierId = e.target.value; 
+          genererClavierDOM(); 
+          update(); 
+        });
+      }
+
+      document.getElementById('btnPousse')?.addEventListener('click', () => { 
+        currentDirection = 'pousse'; 
+        directionVerrouilleeParUtilisateur = true; 
+        update('bouton'); 
+      });
+
+      document.getElementById('btnTire')?.addEventListener('click', () => { 
+        currentDirection = 'tire'; 
+        directionVerrouilleeParUtilisateur = true; 
+        update('bouton'); 
+      });
+
+      document.querySelectorAll('#page-calculateur select').forEach(s => s.addEventListener('change', () => {
+        if(s.id !== 'choixClavier') update('select');
+      }));
+
+      document.getElementById('btnAjouterSuite')?.addEventListener('click', () => {
+        if(currentClavierId === 'test') return;
+
+        const tonique = document.getElementById('noteBase').value;
+        const mode = document.getElementById('modeAccord').value;
+        const enrichissement = document.getElementById('enrichissementAccord').value;
+        
+        const resP = getCalculsPourSoufflet('pousse', tonique, mode, enrichissement);
+        const resT = getCalculsPourSoufflet('tire', tonique, mode, enrichissement);
+        
+        let boutonsChoisis = (currentDirection === 'pousse') ? resP[0] : resT[0];
+        if (!boutonsChoisis || boutonsChoisis.length === 0) return;
+
+        suiteDAccordsMemo.push({
+          id: Date.now(),
+          nom: `${tonique} ${mode === 'majeur' ? 'Maj' : mode === 'mineur' ? 'Min' : 'Neutre'} (${enrichissement})`,
+          soufflet: currentDirection.toUpperCase(),
+          boutons: boutonsChoisis, 
+          clavierRef: currentClavierId
+        });
+        
+        sauvegarderSuites();
+        
+        const btn = document.getElementById('btnAjouterSuite');
+        const textOrig = btn.innerText;
+        btn.innerText = "✓ Ajouté !";
+        setTimeout(() => { btn.innerText = textOrig; }, 1000);
+      });
+
+      injecterClavierPersoDansSelecteur();
+      genererClavierDOM();
+      update();
+    });
+  </script>
+</body>
+</html>
