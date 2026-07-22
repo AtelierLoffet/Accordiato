@@ -70,18 +70,16 @@
     .panel-edition .controls-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 0; }
 
     /* --- SPLASH SCREEN --- */
-    #splash-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #0f2133; z-index: 9999; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease-out; }
-    .splash-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('https://static.wixstatic.com/media/c45ea3_90458de43b47412e8262b96fc9e440f8~mv2.jpg/v1/fill/w_953,h_650,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/c45ea3_90458de43b47412e8262b96fc9e440f8~mv2.jpg'); background-size: cover; background-position: center; opacity: 0.15; z-index: 1; filter: grayscale(30%) brightness(0.8); }
+    #splash-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #0f2133; z-index: 9999; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s ease-out; cursor: pointer; }
     .splash-content { position: relative; z-index: 2; text-align: center; color: #dda96b; }
-    .splash-logo { max-width: 90%; width: 320px; margin-bottom: 25px; background: rgba(255, 255, 255, 0.85); padding: 20px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6); }
-    .splash-title { font-size: 2.8rem; margin: 0; letter-spacing: 2px; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-    .splash-version { font-size: 1.1rem; margin-top: 8px; color: #b2c8de; letter-spacing: 1px; }
+    .splash-logo { max-width: 90%; width: 280px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.9); padding: 15px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6); }
+    .splash-title { font-size: 2.2rem; margin: 0; letter-spacing: 2px; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+    .splash-version { font-size: 0.9rem; margin-top: 8px; color: #b2c8de; letter-spacing: 1px; }
   </style>
 </head>
 <body>
 
   <div id="splash-screen">
-    <div class="splash-bg"></div>
     <div class="splash-content">
       <img src="https://static.wixstatic.com/media/352599_3035c95e1ee94258b05e3b2402ea76c0~mv2.png" alt="Logo Atelier Loffet" class="splash-logo">
       <h1 class="splash-title">AccorDiato</h1>
@@ -229,7 +227,6 @@
             <option value="Do#">Do#</option>
             <option value="Ré">Ré</option>
             <option value="Mib">Mib</option>
-            <option value="Mi">Mi</option>
             <option value="Fa">Fa</option>
             <option value="Fa#">Fa#</option>
             <option value="Sol">Sol</option>
@@ -829,15 +826,19 @@
     // 8. ÉCOUTEURS D'ÉVÉNEMENTS & DÉMARRAGE
     // =================================================================
     document.addEventListener('DOMContentLoaded', () => {
-      // --- GESTION DU SPLASH SCREEN ---
+      // --- GESTION DU SPLASH SCREEN (SECURISÉE) ---
       const splash = document.getElementById('splash-screen');
       if (splash) {
-        setTimeout(() => {
+        const fermerSplash = () => {
           splash.style.opacity = '0';
-          setTimeout(() => {
-            splash.style.display = 'none';
-          }, 800);
-        }, 4000); 
+          setTimeout(() => { splash.style.display = 'none'; }, 500);
+        };
+
+        // Fermeture automatique après 1.5s
+        setTimeout(fermerSplash, 1500);
+
+        // Fermeture immédiate au clic
+        splash.addEventListener('click', fermerSplash);
       }
       
       const choixClavier = document.getElementById('choixClavier');
