@@ -103,14 +103,15 @@
       <div class="form-group span-3">
         <label for="choixClavier">Schéma de clavier</label>
         <select id="choixClavier">
+          <option value="solDo2Rangs"> Standard 2 rangs G/C (Numéros de boutons)</option>
           <option value="milleret" selected>Milleret / Pignol (G/C 3 rangs)</option>
           <option value="heim_1">Heim 1 (G/C 3 rangs)</option>
           <option value="loffet">Loffet (G/C 3 rangs)</option>
           <option value="nmad">N.M.A.D. 2018 (G/C 3 rangs)</option>
-          <option value="gaillard">Système Gaillard (G/C 3 rangs)</option>
-          <option value="letron">Système Le Tron / Laloy (G/C 3 rangs)</option>
-          <option value="corgeron">Système J.-M. Corgeron (G/C 3 rangs)</option>
-          <option value="test">Mode Test (Numéros de boutons)</option>
+          <option value="gaillard"> Gaillard (G/C 3 rangs)</option>
+          <option value="letron"> Le Tron / Laloy (G/C 3 rangs)</option>
+          <option value="corgeron"> J.-M. Corgeron (G/C 3 rangs)</option>
+
         </select>
       </div>
 
@@ -297,6 +298,17 @@
           "1": "1",     "2": "2",     "3": "3",     "4": "4",     "5": "5",     "6": "6",     "7": "7",     "8": "8",     "9": "9",     "10": "10",   "11": "11",    "0": "0"
         }
       },
+      solDo2Rangs: {
+          pousse: {
+            "1": "Mib", "2": "Ré", "3": "Sol", "4": "Si", "5": "Ré", "6": "Sol", "7": "Si", "8": "Ré", "9": "Sol", "10": "Si", "11": "Ré",
+            "1'": "Sol#", "2'": "Sol", "3'": "Do", "4'": "Mi", "5'": "Sol", "6'": "Do", "7'": "Mi", "8'": "Sol", "9'": "Do", "10'": "Mi"
+          },
+          tire: {
+            "1": "Do#", "2": "Fa#", "3": "La", "4": "Do", "5": "Mi", "6": "Fa#", "7": "La", "8": "Do", "9": "Mi", "10": "Fa#", "11": "La",
+            "1'": "Sib", "2'": "Si", "3'": "Ré", "4'": "Fa", "5'": "La", "6'": "Si", "7'": "Ré", "8'": "Fa", "9'": "La", "10'": "Si"
+          }
+        },
+
       heim_1: {
           pousse: {
             "1": "Si", "2": "Ré", "3": "Sol", "4": "Si", "5": "Ré", "6": "Sol", "7": "Si", "8": "Ré", "9": "Sol", "10": "Si", "11": "Ré",
